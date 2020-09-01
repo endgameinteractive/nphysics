@@ -329,9 +329,11 @@ impl<N: RealField, Handle: BodyHandle, CollHandle: ColliderHandle>
          * Handle CCD
          *
          */
+        /*
         self.counters.ccd_started();
         self.solve_ccd(gworld, bodies, colliders, constraints, forces);
         self.counters.ccd_completed();
+        */
 
         if !self.substep.active {
             /*
@@ -671,7 +673,7 @@ impl<N: RealField, Handle: BodyHandle, CollHandle: ColliderHandle>
                                                 .substep
                                                 .body_times
                                                 .entry(h)
-                                                .or_insert_with(N::zero);
+                                                .or_insert(N::zero());
 
                                             let target_time =
                                                 frozen.get(&h).cloned().unwrap_or(last_toi);
@@ -930,8 +932,8 @@ impl<N: RealField, Handle: BodyHandle, CollHandle: ColliderHandle> TOIEntry<N, H
         let _margins = c1.margin() + c2.margin();
         let target = params.allowed_linear_error; // self.integration_parameters.allowed_linear_error.max(margins - self.integration_parameters.allowed_linear_error * na::convert(3.0));
 
-        let body_time1 = body_times.get(&c1.body()).cloned().unwrap_or_else(N::zero);
-        let body_time2 = body_times.get(&c2.body()).cloned().unwrap_or_else(N::zero);
+        let body_time1 = body_times.get(&c1.body()).cloned().unwrap_or(N::zero());
+        let body_time2 = body_times.get(&c2.body()).cloned().unwrap_or(N::zero());
         let time1 = frozen1.unwrap_or(body_time1);
         let time2 = frozen2.unwrap_or(body_time2);
 
@@ -959,9 +961,7 @@ impl<N: RealField, Handle: BodyHandle, CollHandle: ColliderHandle> TOIEntry<N, H
         if motion1.is_static_or_linear() && motion2.is_static_or_linear() {
             let pos1 = motion1.position_at_time(N::zero()) * c1.position_wrt_body();
             let pos2 = motion2.position_at_time(N::zero()) * c2.position_wrt_body();
-            let dispatcher = query::DefaultTOIDispatcher;
             toi = query::time_of_impact(
-                &dispatcher,
                 &pos1,
                 &motion1.linvel(),
                 c1.shape(),
@@ -970,22 +970,18 @@ impl<N: RealField, Handle: BodyHandle, CollHandle: ColliderHandle> TOIEntry<N, H
                 c2.shape(),
                 remaining_time,
                 target,
-            )
-            .ok()??
+            )?
         } else {
             let motion1 = motion1.prepend_transformation(c1.position_wrt_body());
             let motion2 = motion2.prepend_transformation(c2.position_wrt_body());
-            let dispatcher = query::DefaultTOIDispatcher;
             toi = query::nonlinear_time_of_impact(
-                &dispatcher,
                 &motion1,
                 c1.shape(),
                 &motion2,
                 c2.shape(),
                 remaining_time,
                 target,
-            )
-            .ok()??
+            )?
         }
 
         if params.ccd_on_penetration_enabled || toi.status != TOIStatus::Penetrating {
