@@ -46,6 +46,16 @@ impl<N: RealField, Handle: BodyHandle> ColliderAnchor<N, Handle> {
             ColliderAnchor::OnDeformableBody { body, .. } => *body,
         }
     }
+
+    ///Set the body handle
+    pub fn set_body_handle(&mut self, handle: BodyPartHandle<Handle>) {
+        match self {
+            ColliderAnchor::OnBodyPart {
+                ref mut body_part, ..
+            } => *body_part = handle,
+            ColliderAnchor::OnDeformableBody { ref mut body, .. } => *body = handle.0,
+        }
+    }
 }
 
 /// The data a collider set must return after a collider has been removed.
@@ -102,6 +112,11 @@ impl<N: RealField, Handle: BodyHandle> ColliderData<N, Handle> {
     /// Handle to the body this collider is attached to.
     pub fn body(&self) -> Handle {
         self.anchor.body()
+    }
+
+    /// Set the body handle
+    pub fn set_body_handle(&mut self, handle: BodyPartHandle<Handle>) {
+        self.anchor.set_body_handle(handle);
     }
 
     /// The anchor attaching this collider with a body part or deformable body.
@@ -237,6 +252,11 @@ impl<N: RealField, Handle: BodyHandle> Collider<N, Handle> {
     #[inline]
     pub fn body(&self) -> Handle {
         self.0.data().body()
+    }
+
+    ///Set the body handle for this collider
+    pub fn set_body(&mut self, handle: BodyPartHandle<Handle>) {
+        self.0.data_mut().set_body_handle(handle);
     }
 
     /// The anchor attaching this collider with a body part or deformable body.

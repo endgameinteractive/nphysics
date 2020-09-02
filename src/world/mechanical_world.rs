@@ -329,9 +329,11 @@ impl<N: RealField, Handle: BodyHandle, CollHandle: ColliderHandle>
          * Handle CCD
          *
          */
+        /*
         self.counters.ccd_started();
         self.solve_ccd(gworld, bodies, colliders, constraints, forces);
         self.counters.ccd_completed();
+        */
 
         if !self.substep.active {
             /*
